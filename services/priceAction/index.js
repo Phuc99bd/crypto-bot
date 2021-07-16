@@ -1,29 +1,69 @@
 const axios = require('axios');
 const { endpoint, tokenC, tokenTele } = require('../../constants');
+const moment = require('moment');
 
 const formatPrice = (price) =>{
-    return price.toFixed(5);
+    return price;
 }
 
 const sendCMA = async (chatId, symbol, bot) => {
-    let { data } = await axios.get(`${endpoint}?data=assets&key=${tokenC}&symbol=${symbol}`).catch(err => {
+    let { data } = await axios.get(`${endpoint}/ticker/24hr?symbol=${symbol.toUpperCase()}USDT`).catch(err => {
         console.log(err);
     });
     if(data){
-        data = data.data[0];
         bot.sendMessage(chatId , 
             `<b>${symbol.toUpperCase()}</b> \n`
-            + `<i>price: <u>${formatPrice(data.price)}$</u> </i>\n`
-            + `<i>percent change 24h: <u>${formatPrice(data.percent_change_24h)}%</u> </i>\n`
-            + `<i>percent change 7d: <u>${data.percent_change_7d}%</u> </i>\n`
-            + `<i>percent change 30d: <u>${data.percent_change_30d}%</u> </i>\n`
-            + `<i>volume 24h: <u>${formatPrice(data.volume_24h)}</u> </i>\n`
-            + `<i>price open candy: <u>${formatPrice(data.open)}$</u> </i>\n`
-            + `<i>ATH: <u>${formatPrice(data.high)}$</u> </i> \n`,
+            + `<i><b>Last price: </b> ${data.lastPrice}$ </i>\n`
+            + `<i><b>Low price</b>: ${data.lowPrice}$ </i>\n`
+            + `<i><b>Volume: </b>: ${data.volume}${symbol.toUpperCase()}</i>\n`
+            + `<i><b>Price change 24h: </b> ${formatPrice(data.priceChange)}$ </i>\n`
+            + `<i><b>Percent change 24h: </b> ${formatPrice(data.priceChangePercent)}% </i>\n`
+            + `<i><b>High price</b>: ${data.highPrice}$ </i>\n`,
             {
                 parse_mode: "HTML"
             });
+        KSMK(symbol , chatId, bot);
     }
+
+    
+}
+
+const KSMK = async (symbol, chatId, bot) => {
+    const dataMarkets = await axios.get(`${endpoint}/klines?symbol=${symbol.toUpperCase()}USDT&interval=1h&limit=20`);
+    if(dataMarkets.data && dataMarkets.data.length > 0){
+        const data = getData(dataMarkets.data);
+        const point = ((+data[3].close - +data[0].close) / +data[0].close) * 100;
+        if(point > 1 || point < -1){
+            bot.sendMessage(chatId ,
+                `<b>${data[3].openTime} -> ${data[0].closeTime}</b>\n` 
+                +`<b>${point > 1 ? 'Up' : 'Down'} ${point} %</b> \n`,
+                {
+                    parse_mode: "HTML"
+                }
+            );
+        }else{
+            bot.sendMessage(chatId ,
+                `<b>${data[3].openTime} -> ${data[0].closeTime}</b>\n` 
+                +`<b>Sideway giao động ${point}% \nGiá giao động tương đương ~ ${data[3].close} -> ${data[0].close}</b> \n`,
+                {
+                    parse_mode: "HTML"
+                }
+            );
+        }
+    }
+}
+
+const getData = (data)=> {
+    data = data.reverse();
+    data = data.map(e=> ({
+        hight: e[2],
+        low: e[3],
+        close: e[4],
+        vol: e[5],
+        openTime: moment(e[0]).format('DD-MM-YYYY HH:mm:ss'),
+        closeTime: moment(e[6]).format('DD-MM-YYYY HH:mm:ss')
+    }))
+    return data;
 }
 
 const sendChart = (chatId , symbol , bot) => {
@@ -36,7 +76,7 @@ const sendChart = (chatId , symbol , bot) => {
 
 const sendHelp = (chatId , bot , username) => {
     bot.sendMessage(chatId , 
-        ` Hello ${username}, us, what can i do for you\n`
+        ` Hello @${username}, us, what can i do for you\n`
         + `<b>/p symbol</b>`,
         {
             parse_mode: "HTML"
@@ -46,5 +86,6 @@ const sendHelp = (chatId , bot , username) => {
 module.exports = {
     sendCMA,
     sendChart,
-    sendHelp
+    sendHelp,
+    KSMK
 }
