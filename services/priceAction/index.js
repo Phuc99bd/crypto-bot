@@ -36,7 +36,7 @@ const KSMK = async (symbol, chatId, bot) => {
         if(point > 1 || point < -1){
             bot.sendMessage(chatId ,
                 `<b>${data[3].openTime} -> ${data[0].closeTime}</b>\n` 
-                +`<b>${point > 1 ? 'Up' : 'Down'} ${point} %</b> \n`
+                +`<b>${point > 1 ? 'Up' : 'Down'} ${point.toFixed(2)} %</b> \n`
                 +`<b>Giá: ${data[3].open} -> ${data[0].close}</b> \n`
                 ,
                 {
@@ -46,7 +46,7 @@ const KSMK = async (symbol, chatId, bot) => {
         }else{
             bot.sendMessage(chatId ,
                 `<b>${data[3].openTime} -> ${data[0].closeTime}</b>\n` 
-                +`<b>Sideway giao động ${point}% \nGiá giao động tương đương ~ ${data[3].open} -> ${data[0].close}</b> \n`,
+                +`<b>Sideway giao động ${point.toFixed(2)}% \nGiá giao động tương đương ~ ${data[3].open} -> ${data[0].close}</b> \n`,
                 {
                     parse_mode: "HTML"
                 }
