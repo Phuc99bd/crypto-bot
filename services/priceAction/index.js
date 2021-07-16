@@ -59,6 +59,7 @@ const getData = (data)=> {
         hight: e[2],
         low: e[3],
         close: e[4],
+        open: e[1],
         vol: e[5],
         openTime: moment(e[0]).format('DD-MM-YYYY HH:mm:ss'),
         closeTime: moment(e[6]).format('DD-MM-YYYY HH:mm:ss')
