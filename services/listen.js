@@ -34,9 +34,10 @@ const listen = () => {
 }
 
 const BCTH = () => {
-    schedule.scheduleJob('0 */1 * * *', function(){
+    schedule.scheduleJob('0 */1 * * *', async () =>{
         if(moment().hours() % 4 == 0){
-            KSMK('btc' , '-1001582548049', bot);
+            await sendCMA(chatId, 'btc' , bot);
+            await KSMK('btc' , '-1001582548049', bot);
         }
     });
 }
