@@ -32,7 +32,7 @@ const KSMK = async (symbol, chatId, bot) => {
     const dataMarkets = await axios.get(`${endpoint}/klines?symbol=${symbol.toUpperCase()}USDT&interval=1h&limit=20`);
     if(dataMarkets.data && dataMarkets.data.length > 0){
         const data = getData(dataMarkets.data);
-        const point = ((+data[3].close - +data[0].close) / +data[0].close) * 100;
+        const point = ((+data[0].close - +data[3].open) / +data[0].open) * 100;
         if(point > 1 || point < -1){
             bot.sendMessage(chatId ,
                 `<b>${data[3].openTime} -> ${data[0].closeTime}</b>\n` 
@@ -44,7 +44,7 @@ const KSMK = async (symbol, chatId, bot) => {
         }else{
             bot.sendMessage(chatId ,
                 `<b>${data[3].openTime} -> ${data[0].closeTime}</b>\n` 
-                +`<b>Sideway giao động ${point}% \nGiá giao động tương đương ~ ${data[3].close} -> ${data[0].close}</b> \n`,
+                +`<b>Sideway giao động ${point}% \nGiá giao động tương đương ~ ${data[3].close} -> ${data[0].open}</b> \n`,
                 {
                     parse_mode: "HTML"
                 }
